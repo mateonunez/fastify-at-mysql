@@ -34,7 +34,7 @@ fastify.get('/', async (request, reply) => {
 })
 ```
 
-The `query` method returns a `Promise` that resolves to an array of objects. Each object represents a row in the result set. It wraps the `sql` method from `@databases/mysql` package that prevents SQL injection attacks.
+The `query` property autimatically wraps the `sql` that is a tagged template and gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
 
 ## Options
 
