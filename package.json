@@ -1,0 +1,56 @@
+{
+  "name": "fastify-at-mysql",
+  "version": "0.0.1",
+  "description": "Fastify MySQL plugin using @databases",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "author": {
+    "name": "Mateo Nunez",
+    "email": "mateonunez95@gmail.com",
+    "url": "http://github.com/mateonunez"
+  },
+  "scripts": {
+    "lint": "standard | snazzy",
+    "lint:fix": "standard --fix | snazzy",
+    "test": "npm run lint && npm run unit && npm run typescript",
+    "test:ci": "tap --coverage-report=lcov test/*.test.js && npm run typescript",
+    "typescript": "tsd",
+    "unit": "tap test/*.test.js",
+    "unit:report": "tap test/test.js --cov --coverage-report=html --coverage-report=cobertura",
+    "unit:verbose": "tap test/test.js -Rspec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateonunez/fastify-at-mysql.git"
+  },
+  "keywords": [
+    "fastify",
+    "mysql",
+    "@databases"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mateonunez/fastify-at-mysql/issues"
+  },
+  "homepage": "https://github.com/mateonunez/fastify-at-mysql#readme",
+  "dependencies": {
+    "fastify-plugin": "^4.4.0"
+  },
+  "devDependencies": {
+    "@databases/mysql": "^5.2.1",
+    "@fastify/pre-commit": "^2.0.2",
+    "@types/node": "^18.11.15",
+    "fastify": "^4.10.2",
+    "snazzy": "^9.0.0",
+    "standard": "^17.0.0",
+    "tap": "^16.3.2",
+    "tsd": "^0.25.0",
+    "typescript": "^4.9.4"
+  },
+  "pre-commit": [
+    "test"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
