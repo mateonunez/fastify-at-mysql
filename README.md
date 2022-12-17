@@ -34,7 +34,18 @@ fastify.get('/', async (request, reply) => {
 })
 ```
 
-The `query` property autimatically wraps the `sql` that is a tagged template and gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
+The `query` property autimatically wraps the `sql` method. It gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
+
+The exposed object from the plugin is:
+
+```
+const db = {
+  query,  // use this to create queries in a simple way
+  close,  // use this if you want to close the MySQL connection
+  sql,    // method to create queries in a safe-way
+  db      // database object 
+}
+```
 
 ## Options
 
