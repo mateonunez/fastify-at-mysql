@@ -60,17 +60,25 @@ test('fastify-at-mysql can connect to a MySQL database with a connection string'
   })
 })
 
-test('should throw with multiple instances', ({ ok, same, plan }) => {
-  plan(2)
+test('should works with multiple instances', ({ error, ok, plan }) => {
+  plan(3)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql, options)
-  fastify.register(fastifyMysql, options)
+  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyMysql, { ...options, name: 'second_db' })
 
-  fastify.ready((errors) => {
-    ok(errors)
-    same(errors.message, 'fastify-mysql or another mysql plugin has already been registered')
+  fastify.ready(async (err) => {
+    error(err)
+
+    const resultFirst = await fastify.mysql.first_db.query('SELECT NOW()')
+    ok(resultFirst.length)
+
+    const resultSecond = await fastify.mysql.second_db.query('SELECT NOW()')
+    ok(resultSecond.length)
+
     fastify.close()
+    fastify.mysql.first_db.close()
+    fastify.mysql.second_db.close()
   })
 })
 
@@ -96,6 +104,34 @@ test('should throw with invalid connection string', ({ ok, same, plan }) => {
   fastify.ready((errors) => {
     ok(errors)
     same(errors.message, 'Invalid connection string')
+    fastify.close()
+  })
+})
+
+test('should throw with multiple instances and same name', ({ ok, same, plan }) => {
+  plan(2)
+  const fastify = Fastify()
+
+  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+
+  fastify.ready((errors) => {
+    ok(errors)
+    same(errors.message, "fastify-mysql has already been registered with name 'first_db'")
+    fastify.close()
+  })
+})
+
+test('should throw without name option and multiple instances', ({ ok, same, plan }) => {
+  plan(2)
+  const fastify = Fastify()
+
+  fastify.register(fastifyMysql, { ...options })
+  fastify.register(fastifyMysql, { ...options })
+
+  fastify.ready((errors) => {
+    ok(errors)
+    same(errors.message, 'fastify-mysql or another mysql plugin has already been registered')
     fastify.close()
   })
 })
