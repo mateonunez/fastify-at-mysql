@@ -21,7 +21,6 @@ test('fastify-at-mysql is correctly defined', ({ ok, plan }) => {
 
   fastify.ready(() => {
     ok(fastify.mysql)
-    fastify.mysql.close()
     fastify.close()
   })
 })
@@ -38,7 +37,6 @@ test('fastify-at-mysql can connect to a MySQL database', ({ error, ok, plan }) =
     const result = await fastify.mysql.query('SELECT NOW()')
     ok(result.length)
 
-    fastify.mysql.close()
     fastify.close()
   })
 })
@@ -55,7 +53,6 @@ test('fastify-at-mysql can connect to a MySQL database with a connection string'
     const result = await fastify.mysql.query('SELECT NOW()')
     ok(result.length)
 
-    fastify.mysql.close()
     fastify.close()
   })
 })
@@ -77,8 +74,6 @@ test('should works with multiple instances', ({ error, ok, plan }) => {
     ok(resultSecond.length)
 
     fastify.close()
-    fastify.mysql.first_db.close()
-    fastify.mysql.second_db.close()
   })
 })
 

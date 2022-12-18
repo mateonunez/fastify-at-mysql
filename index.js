@@ -19,9 +19,12 @@ function fastifyMysql (fastify, options, next) {
     connectionString: connectionString || buildConnectionString({ host, user, password, database, port })
   })
 
+  fastify.addHook('onClose', (_, done) => {
+    db.dispose().then(() => done()).catch(done)
+  })
+
   const decoratorObject = {
     query: (queryString) => db.query(sql(queryString)),
-    close: () => db.dispose(),
     sql,
     db
   }
