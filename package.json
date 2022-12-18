@@ -1,7 +1,7 @@
 {
   "name": "fastify-at-mysql",
-  "version": "0.0.1",
-  "description": "Fastify MySQL plugin using @databases",
+  "version": "0.1.0",
+  "description": "Fastify MySQL to prevent SQL injection attacks",
   "main": "index.js",
   "types": "types/index.d.ts",
   "author": {
