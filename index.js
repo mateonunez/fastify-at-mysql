@@ -2,21 +2,25 @@
 
 const fp = require('fastify-plugin')
 const createConnectionPool = require('@databases/mysql')
+const { buildConnectionString, validateConnectionString } = require('./lib/connection-string')
 
 function fastifyMysql (fastify, options, next) {
   if (fastify.mysql) {
     return next(new Error('fastify-mysql or another mysql plugin has already been registered'))
   }
 
-  const { host, user, password, database, port = 3306 } = options
-  if (!host || !user || !password || !database) {
+  const { host, user, password, database, port = 3306, connectionString = null } = options
+  if (connectionString) {
+    if (!validateConnectionString(connectionString)) {
+      return next(new Error('Invalid connection string'))
+    }
+  } else if (!host || !user || !password || !database) {
     return next(new Error('Missing required options'))
   }
 
-  const connectionString = __buildConnectionString({ host, user, password, database, port })
   const { sql } = createConnectionPool
   const db = createConnectionPool({
-    connectionString
+    connectionString: connectionString || buildConnectionString({ host, user, password, database, port })
   })
 
   fastify.decorate('mysql', {
@@ -27,10 +31,6 @@ function fastifyMysql (fastify, options, next) {
   })
 
   next()
-}
-
-function __buildConnectionString ({ host, user, password, database, port }) {
-  return `mysql://${user}:${password}@${host}:${port}/${database}`
 }
 
 module.exports = fp(fastifyMysql, {
