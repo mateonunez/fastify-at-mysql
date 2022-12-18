@@ -35,10 +35,7 @@ function fastifyMysql (fastify, options, next) {
       return next(new Error(`fastify-mysql has already been registered with name '${name}'`))
     }
 
-    fastify.mysql = {
-      ...fastify.mysql,
-      [name]: decoratorObject
-    }
+    fastify.mysql[name] = decoratorObject
   } else {
     if (fastify.mysql) {
       return next(new Error('fastify-mysql or another mysql plugin has already been registered'))
