@@ -4,6 +4,7 @@ const t = require('tap')
 const test = t.test
 const Fastify = require('fastify')
 const fastifyMysql = require('..')
+const { same } = require('tap')
 
 const options = {
   host: 'localhost',
@@ -112,7 +113,7 @@ test('should throw with multiple instances and same name', ({ ok, same, plan }) 
 
   fastify.ready((errors) => {
     ok(errors)
-    same(errors.message, "fastify-mysql has already been registered with name 'first_db'")
+    same(errors.message, 'fastify-mysql has already been registered with name \'first_db\'')
     fastify.close()
   })
 })
@@ -127,6 +128,78 @@ test('should throw without name option and multiple instances', ({ ok, same, pla
   fastify.ready((errors) => {
     ok(errors)
     same(errors.message, 'fastify-mysql or another mysql plugin has already been registered')
+    fastify.close()
+  })
+})
+
+test('should create a single query and execute it with the tx() method', ({ error, ok, plan }) => {
+  plan(2)
+
+  const fastify = Fastify()
+  fastify.register(fastifyMysql, options)
+
+  fastify.ready(async (err) => {
+    error(err)
+
+    const queryArray = ['SELECT NOW();']
+
+    const result = await fastify.mysql.tx(queryArray)
+    ok(result.length)
+
+    fastify.close()
+  })
+})
+test('should create a batch of queries and execute it with the tx() method', ({ error, ok, plan }) => {
+  plan(2)
+
+  const fastify = Fastify()
+  fastify.register(fastifyMysql, options)
+
+  fastify.ready(async (err) => {
+    error(err)
+
+    const queryArray = ['SELECT NOW();', 'SELECT NOW();', 'SELECT NOW();', 'SELECT NOW();', 'SELECT NOW();', 'SELECT NOW();']
+
+    const result = await fastify.mysql.tx(queryArray)
+    ok(result.length)
+
+    fastify.close()
+  })
+})
+
+test('should fail to create a chunk of queries and throw back an error', ({ error, ok, plan }) => {
+  plan(2)
+
+  const fastify = Fastify()
+  fastify.register(fastifyMysql, options)
+
+  fastify.ready(async (err) => {
+    error(err)
+
+    const queryArray = { query: 'SELECT NOW()' }
+
+    await fastify.mysql.tx(queryArray).catch((e) => {
+      ok(e)
+      same(e.message, 'The query array is not an array')
+    })
+    fastify.close()
+  })
+})
+
+test('should fail to process a malformed query and throw back an error', ({ error, ok, plan }) => {
+  plan(2)
+
+  const fastify = Fastify()
+  fastify.register(fastifyMysql, options)
+
+  fastify.ready(async (err) => {
+    error(err)
+
+    const queryArray = { query: 'SELECT NOW()' }
+
+    await fastify.mysql.tx(queryArray).catch((e) => {
+      ok(e)
+    })
     fastify.close()
   })
 })

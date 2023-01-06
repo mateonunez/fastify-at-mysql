@@ -23,8 +23,44 @@ function fastifyMysql (fastify, options, next) {
     db.dispose().then(() => done()).catch(done)
   })
 
+  // queryString needs to be explored to check if
+  /*
+  - It's safe to use
+  - It regards a batch
+      - If so I need to change the connectionpool configs to avoid graceful degradation based on the batch size and type of query (mods and insertions have double weight)
+  - Otherwise no issue nothing to see here move along sir
+  - And I send back the whole thing to the framework ready to execute, so I need to have a
+   */
+
+  const transactionMethod = async (queryArray) => {
+    const maxBatchSizeBeforeSplitting = 2000
+    const maxBatchSizeBeforeDegradation = 1000
+
+    if (Array.isArray(queryArray)) {
+      return await db.tx(async () => {
+        try {
+          const chunkSize = queryArray.length > maxBatchSizeBeforeSplitting ? maxBatchSizeBeforeDegradation : queryArray.length // query chunk size (to adjust according to MySQL benchmarking)
+          const entireResult = []
+          for (let i = 0; i < queryArray.length; i += chunkSize) {
+            const chunk = queryArray.slice(i, i + chunkSize)
+            const partialResult = await db.query(sql(chunk))
+            entireResult.push(partialResult)
+          }
+          return entireResult
+        } catch (error) {
+          console.log(error)
+          throw error
+        }
+      })
+    } else {
+      throw new Error('The query array is not an array')
+    }
+    // need error handling, to define
+  }
+
   const decoratorObject = {
     query: (queryString) => db.query(sql(queryString)),
+    tx: (queryArray) => transactionMethod(queryArray),
     sql,
     db
   }
