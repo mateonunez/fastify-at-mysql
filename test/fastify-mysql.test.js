@@ -195,7 +195,7 @@ test('should fail to process a malformed query and throw back an error', ({ erro
   fastify.ready(async (err) => {
     error(err)
 
-    const queryArray = { query: 'SELECT NOW()' }
+    const queryArray = ['SELECT BOW();']
 
     await fastify.mysql.tx(queryArray).catch((e) => {
       ok(e)
