@@ -23,8 +23,22 @@ function fastifyMysql (fastify, options, next) {
     db.dispose().then(() => done()).catch(done)
   })
 
+  async function executeTransaction (queries) {
+    const transactionResult = await db.tx(async () => {
+      const results = []
+      for (const query of queries) {
+        const result = await db.query(sql(query))
+        results.push(result[0].result)
+      }
+      return results
+    })
+
+    return transactionResult
+  }
+
   const decoratorObject = {
-    query: (queryString) => db.query(sql(queryString)),
+    query: async (queryString) => await db.query(sql(queryString)),
+    transaction: async (queryArray) => await executeTransaction(queryArray),
     sql,
     db
   }
