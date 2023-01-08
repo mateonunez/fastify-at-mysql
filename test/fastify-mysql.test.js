@@ -4,6 +4,7 @@ const t = require('tap')
 const test = t.test
 const Fastify = require('fastify')
 const fastifyMysql = require('..')
+const { same } = require('tap')
 
 const options = {
   host: 'localhost',
@@ -68,6 +69,7 @@ test('should works with multiple instances', ({ error, ok, plan }) => {
     error(err)
 
     const resultFirst = await fastify.mysql.first_db.query('SELECT NOW()')
+    console.log(resultFirst)
     ok(resultFirst.length)
 
     const resultSecond = await fastify.mysql.second_db.query('SELECT NOW()')
@@ -144,6 +146,28 @@ test('should create a single query and execute it with the transaction() method'
 
     const result = await fastify.mysql.first_db.transaction(queryArray)
     ok(result.length)
+
+    fastify.close()
+  })
+})
+
+test('should create an array of queries and execute it with the transaction() method', ({ error, ok, plan }) => {
+  plan(2)
+
+  const fastify = Fastify()
+  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+
+  fastify.ready(async (err) => {
+    error(err)
+
+    const queryArray = ['SELECT 1+1 as result;', 'SELECT 4+4 as result;']
+
+    const result = await fastify.mysql.first_db.transaction(queryArray)
+
+    ok(result.length)
+
+    same(result[0], 2)
+    same(result[1], 8)
 
     fastify.close()
   })

@@ -23,18 +23,22 @@ function fastifyMysql (fastify, options, next) {
     db.dispose().then(() => done()).catch(done)
   })
 
-  // queryString needs to be explored to check if
-  /*
-  - It's safe to use
-  - It regards a batch
-      - If so I need to change the connectionpool configs to avoid graceful degradation based on the batch size and type of query (mods and insertions have double weight)
-  - Otherwise no issue nothing to see here move along sir
-  - And I send back the whole thing to the framework ready to execute, so I need to have a
-   */
+  const executeTransaction = async (queries) => {
+    const transactionResult = await db.tx(async () => {
+      const toReturnResults = []
+      for (const query of queries) {
+        const partialResult = await db.query(sql(query))
+        toReturnResults.push(partialResult[0].result)
+      }
+      return toReturnResults
+    })
+
+    return transactionResult
+  }
 
   const decoratorObject = {
-    query: (queryString) => db.query(sql(queryString)),
-    transaction: (queryArray) => db.tx(() => queryArray.map((query) => db.query(sql(query)))),
+    query: async (queryString) => await db.query(sql(queryString)),
+    transaction: async (queryArray) => await executeTransaction(queryArray),
     sql,
     db
   }
