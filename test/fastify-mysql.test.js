@@ -69,7 +69,6 @@ test('should works with multiple instances', ({ error, ok, plan }) => {
     error(err)
 
     const resultFirst = await fastify.mysql.first_db.query('SELECT NOW()')
-    console.log(resultFirst)
     ok(resultFirst.length)
 
     const resultSecond = await fastify.mysql.second_db.query('SELECT NOW()')
@@ -114,7 +113,7 @@ test('should throw with multiple instances and same name', ({ ok, same, plan }) 
 
   fastify.ready((errors) => {
     ok(errors)
-    same(errors.message, 'fastify-mysql has already been registered with name \'first_db\'')
+    same(errors.message, "fastify-mysql has already been registered with name 'first_db'")
     fastify.close()
   })
 })

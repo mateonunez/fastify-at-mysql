@@ -23,14 +23,14 @@ function fastifyMysql (fastify, options, next) {
     db.dispose().then(() => done()).catch(done)
   })
 
-  const executeTransaction = async (queries) => {
+  async function executeTransaction (queries) {
     const transactionResult = await db.tx(async () => {
-      const toReturnResults = []
+      const results = []
       for (const query of queries) {
-        const partialResult = await db.query(sql(query))
-        toReturnResults.push(partialResult[0].result)
+        const result = await db.query(sql(query))
+        results.push(result[0].result)
       }
-      return toReturnResults
+      return results
     })
 
     return transactionResult
