@@ -14,7 +14,7 @@ npm install fastify-at-mysql
 
 There are several reasons why you might want to consider using a Fastify plugin to integrate a MySQL database in a secure way and prevent SQL injections:
 
-- Security: By using a plugin that is designed specifically to prevent SQL injections, you can protect your application from one of the most common types of cyber attacks. This is particularly important if you are handling sensitive data or financial transactions.
+- Security: By using a plugin that is designed specifically to prevent SQL injections, you can protect your application from one of the most common types of cyberattacks. This is particularly important if you are handling sensitive data or financial transactions.
 - Simplicity: Using a plugin can make it easier to integrate a MySQL database into your Fastify application. Rather than having to write custom code to handle database connections and queries, you can simply install the plugin and use its API to interact with the database.
 - Performance: A good plugin will be optimized for performance and can help you get the most out of your MySQL database. This can be particularly important if you are working with large datasets or need to handle a high volume of requests.
 - Ecosystem: By using a plugin, you can take advantage of the Fastify ecosystem and leverage the work of the community. This can save you time and effort, as you don't have to reinvent the wheel or write custom code for every aspect of your application.
@@ -42,17 +42,26 @@ fastify.get('/', async (request, reply) => {
 })
 ```
 
-The `query` property autimatically wraps the `sql` method. It gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
-
-The exposed object from the plugin is:
+### Exposed properties
 
 ```
 const db = {
-  query,  // use this to create queries in a simple way
+  query,// use this to create queries in a simple way
+  transaction,//  use this to create transactions
   sql,    // method to create queries in a safe-way
   db,     // database object
 }
 ```
+
+#### Query
+The `query` property automatically wraps the `sql` method. It gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
+
+
+#### Transaction
+The `transaction` property allows you to create a transaction that will be executed entirely or not at all. The underlying method accepts an array of queries. As with the `query` property, it automatically wraps the `sql` method to avoid SQL Injection attacks.
+If you want to know more about the underlying implementation you can read the [transaction](https://www.atdatabases.org/docs/mysql-guide-transactions) documentation from @databases.
+
+
 
 ## Options
 
