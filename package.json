@@ -1,6 +1,6 @@
 {
   "name": "fastify-at-mysql",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fastify MySQL to prevent SQL injection attacks",
   "main": "index.js",
   "types": "types/index.d.ts",
