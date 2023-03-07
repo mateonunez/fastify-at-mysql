@@ -3,14 +3,14 @@ lockfileVersion: 5.4
 specifiers:
   '@databases/mysql': ^5.2.1
   '@fastify/pre-commit': ^2.0.2
-  '@types/node': ^18.11.18
-  fastify: ^4.11.0
+  '@types/node': ^18.14.6
+  fastify: ^4.14.1
   fastify-plugin: ^4.5.0
   snazzy: ^9.0.0
   standard: ^17.0.0
-  tap: ^16.3.3
-  tsd: ^0.25.0
-  typescript: ^4.9.4
+  tap: ^16.3.4
+  tsd: ^0.26.0
+  typescript: ^4.9.5
 
 dependencies:
   fastify-plugin: 4.5.0
@@ -23,7 +23,7 @@ devDependencies:
   snazzy: 9.0.0
   standard: 17.0.0
   tap: 16.3.4_typescript@4.9.5
-  tsd: 0.25.0
+  tsd: 0.26.0
   typescript: 4.9.5
 
 packages:
@@ -3486,8 +3486,8 @@ packages:
       strip-bom: 3.0.0
     dev: true
 
-  /tsd/0.25.0:
-    resolution: {integrity: sha512-liUlvKtsdr+70XEZP/kkF6U8+Q9URZi4Pw58ih7a9x3kjJblG8rdVgvG62xcvkgRva1q3yWX5qAxfYZuYiC5CA==}
+  /tsd/0.26.0:
+    resolution: {integrity: sha512-CNkmeivuy6rH+8iijKf5dRf7lVgHYR2vet+YZFjQgoObDuI9v22ojaOh8Zf2lfJ4wnyT60QYbRsPAN68KVZ+9g==}
     engines: {node: '>=14.16'}
     hasBin: true
     dependencies:
