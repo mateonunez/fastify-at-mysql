@@ -4,15 +4,17 @@ const fp = require('fastify-plugin')
 const createConnectionPool = require('@databases/mysql')
 const { buildConnectionString, validateConnectionString } = require('./lib/connection-string')
 
-function fastifyAtMysql (fastify, options, next) {
+async function fastifyAtMysql (fastify, options) {
   const { host, user, password, database, port = 3306, connectionString = null, name = null } = options
+
+  console.log({ connectionString })
 
   if (connectionString) {
     if (!validateConnectionString(connectionString)) {
-      return next(new Error('Invalid connection string'))
+      throw new Error('Invalid connection string')
     }
   } else if (!host || !user || !password || !database) {
-    return next(new Error('Missing required options'))
+    throw new Error('Missing connection options')
   }
 
   const { sql } = createConnectionPool
@@ -21,7 +23,7 @@ function fastifyAtMysql (fastify, options, next) {
   })
 
   fastify.addHook('onClose', (_, done) => {
-    db.dispose().then(() => done()).catch(done)
+    db.dispose().then(done)
   })
 
   async function executeTransaction (queries) {
@@ -50,19 +52,17 @@ function fastifyAtMysql (fastify, options, next) {
     }
 
     if (fastify.mysql[name]) {
-      return next(new Error(`fastify-mysql has already been registered with name '${name}'`))
+      throw new Error(`fastify-mysql has already been registered with name '${name}'`)
     }
 
     fastify.mysql[name] = decoratorObject
   } else {
     if (fastify.mysql) {
-      return next(new Error('fastify-mysql or another mysql plugin has already been registered'))
+      throw new Error('fastify-mysql or another mysql plugin has already been registered')
     }
 
     fastify.decorate('mysql', decoratorObject)
   }
-
-  next()
 }
 
 module.exports = fp(fastifyAtMysql, {
