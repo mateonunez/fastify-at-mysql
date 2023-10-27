@@ -8,8 +8,6 @@ on:
       - 'docs/**'
       - '*.md'
   pull_request:
-    branches:
-      - '*'
     paths-ignore:
       - 'docs/**'
       - '*.md'
@@ -24,13 +22,35 @@ jobs:
         node-version: [16, 18, 20]
     steps:
       - uses: actions/checkout@v3
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-node-${{ matrix.node-version }}-pnpm-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-${{ matrix.node-version }}-pnpm-
+
       - uses: actions/setup-node@v3
         with:
           node-version: ${{matrix.node-version}}
+
       - uses: pnpm/action-setup@v2.4.0
         with:
           version: 7
+
       - run: docker-compose up -d
+
+      - name: Wait for MySQL to be healthy
+        run: |
+          until docker-compose exec -T mysql mysqladmin ping -uroot -ptoor; do
+            echo "Waiting for MySQL to be healthy"
+            sleep 2
+          done
+
       - run: pnpm install
-      - run: sleep 10
       - run: pnpm test
+
+      - name: Shutdown Docker
+        run: docker-compose down
+        if: always()
