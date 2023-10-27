@@ -4,8 +4,9 @@ const fp = require('fastify-plugin')
 const createConnectionPool = require('@databases/mysql')
 const { buildConnectionString, validateConnectionString } = require('./lib/connection-string')
 
-function fastifyMysql (fastify, options, next) {
+function fastifyAtMysql (fastify, options, next) {
   const { host, user, password, database, port = 3306, connectionString = null, name = null } = options
+
   if (connectionString) {
     if (!validateConnectionString(connectionString)) {
       return next(new Error('Invalid connection string'))
@@ -64,10 +65,10 @@ function fastifyMysql (fastify, options, next) {
   next()
 }
 
-module.exports = fp(fastifyMysql, {
+module.exports = fp(fastifyAtMysql, {
   fastify: '4.x',
   name: 'fastify-mysql'
 })
 
-module.exports.default = fastifyMysql
-module.exports.fastifyMysql = fastifyMysql
+module.exports.default = fastifyAtMysql
+module.exports.fastifyAtMysql = fastifyAtMysql

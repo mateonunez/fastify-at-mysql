@@ -3,7 +3,7 @@
 const t = require('tap')
 const test = t.test
 const Fastify = require('fastify')
-const fastifyMysql = require('..')
+const fastifyAtMysql = require('..')
 const { same } = require('tap')
 
 const options = {
@@ -18,7 +18,7 @@ test('fastify-at-mysql is correctly defined', ({ ok, plan }) => {
   plan(1)
 
   const fastify = Fastify()
-  fastify.register(fastifyMysql, options)
+  fastify.register(fastifyAtMysql, options)
 
   fastify.ready(() => {
     ok(fastify.mysql)
@@ -30,7 +30,7 @@ test('fastify-at-mysql can connect to a MySQL database', ({ error, ok, plan }) =
   plan(2)
 
   const fastify = Fastify()
-  fastify.register(fastifyMysql, options)
+  fastify.register(fastifyAtMysql, options)
 
   fastify.ready(async (err) => {
     error(err)
@@ -46,7 +46,7 @@ test('fastify-at-mysql can connect to a MySQL database with a connection string'
   plan(2)
 
   const fastify = Fastify()
-  fastify.register(fastifyMysql, { connectionString: 'mysql://root:toor@localhost:3306/test' })
+  fastify.register(fastifyAtMysql, { connectionString: 'mysql://root:toor@localhost:3306/test' })
 
   fastify.ready(async (err) => {
     error(err)
@@ -62,8 +62,8 @@ test('should works with multiple instances', ({ error, ok, plan }) => {
   plan(3)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
-  fastify.register(fastifyMysql, { ...options, name: 'second_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'second_db' })
 
   fastify.ready(async (err) => {
     error(err)
@@ -82,7 +82,7 @@ test('should throw with missing options', ({ ok, same, plan }) => {
   plan(2)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql)
+  fastify.register(fastifyAtMysql)
 
   fastify.ready((errors) => {
     ok(errors)
@@ -95,7 +95,7 @@ test('should throw with invalid connection string', ({ ok, same, plan }) => {
   plan(2)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql, { connectionString: 'mysql:\\novalid@localhost:3306' })
+  fastify.register(fastifyAtMysql, { connectionString: 'mysql:\\novalid@localhost:3306' })
 
   fastify.ready((errors) => {
     ok(errors)
@@ -108,8 +108,8 @@ test('should throw with multiple instances and same name', ({ ok, same, plan }) 
   plan(2)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
-  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
 
   fastify.ready((errors) => {
     ok(errors)
@@ -122,8 +122,8 @@ test('should throw without name option and multiple instances', ({ ok, same, pla
   plan(2)
   const fastify = Fastify()
 
-  fastify.register(fastifyMysql, { ...options })
-  fastify.register(fastifyMysql, { ...options })
+  fastify.register(fastifyAtMysql, { ...options })
+  fastify.register(fastifyAtMysql, { ...options })
 
   fastify.ready((errors) => {
     ok(errors)
@@ -136,7 +136,7 @@ test('should create a single query and execute it with the transaction() method'
   plan(2)
 
   const fastify = Fastify()
-  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
 
   fastify.ready(async (err) => {
     error(err)
@@ -154,7 +154,7 @@ test('should create an array of queries and execute it with the transaction() me
   plan(2)
 
   const fastify = Fastify()
-  fastify.register(fastifyMysql, { ...options, name: 'first_db' })
+  fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
 
   fastify.ready(async (err) => {
     error(err)
