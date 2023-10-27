@@ -1,6 +1,6 @@
 {
   "name": "fastify-at-mysql",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Fastify MySQL to prevent SQL injection attacks",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -35,19 +35,19 @@
   },
   "homepage": "https://github.com/mateonunez/fastify-at-mysql#readme",
   "dependencies": {
-    "fastify-plugin": "^4.5.0"
+    "fastify-plugin": "^4.5.1"
   },
   "devDependencies": {
-    "@databases/mysql": "^5.2.1",
+    "@databases/mysql": "^6.0.0",
     "@databases/sql": "^3.3.0",
     "@fastify/pre-commit": "^2.0.2",
-    "@types/node": "^18.11.18",
-    "fastify": "^4.11.0",
+    "@types/node": "^20.8.9",
+    "fastify": "^4.24.3",
     "snazzy": "^9.0.0",
-    "standard": "^17.0.0",
-    "tap": "^16.3.3",
-    "tsd": "^0.25.0",
-    "typescript": "^4.9.4"
+    "standard": "^17.1.0",
+    "tap": "^16.3.9",
+    "tsd": "^0.29.0",
+    "typescript": "^5.2.2"
   },
   "pre-commit": [
     "test"
