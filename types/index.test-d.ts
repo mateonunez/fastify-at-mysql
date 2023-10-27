@@ -1,16 +1,11 @@
 import fastify from 'fastify'
-import fastifyMysql from '..'
-
-declare module 'fastify' {
-  interface FastifyInstance {
-    mysql: any
-  }
-}
+import fastifyAtMysql from '..'
+import { expectType } from 'tsd'
 
 const app = fastify()
 
 app
-  .register(fastifyMysql, {
+  .register(fastifyAtMysql, {
     host: 'localhost',
     port: 3306,
     user: 'root',
@@ -18,6 +13,9 @@ app
     database: 'test',
   })
   .after((err) => {
-    app.mysql.query('SELECT NOW()')
-    app.mysql.close()
+    app.mysql.query('SELECT * FROM users')
+    expectType<Promise<any[]>>(app.mysql.query('SELECT * FROM users'))
+    expectType<Promise<any>>(app.mysql.transaction(['SELECT * FROM users', 'SELECT * FROM users']))
+    expectType<Promise<void>>(app.mysql.db.dispose())
+    app.mysql.db.dispose()
   })

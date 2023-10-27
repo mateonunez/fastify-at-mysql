@@ -1,20 +1,31 @@
-import { ConnectionPoolConfig } from "@databases/mysql";
+import { ConnectionPool, ConnectionPoolConfig } from "@databases/mysql";
+import { SQL } from "@databases/sql";
 import { FastifyPluginCallback } from "fastify";
 
-type FastifyMysql = FastifyPluginCallback<fastifyMysql.MysqlOptions>
-
-declare namespace fastifyMysql {
-  export interface MysqlOptions extends ConnectionPoolConfig {
-    host: string;
-    port: number;
-    user: string;
-    password: string;
-    database: string;
-  }
-
-  export const fastifyMysql: FastifyMysql
-  export { fastifyMysql as default }
+interface FastifyAtMysqlPluginOptions extends ConnectionPoolConfig {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  database: string;
 }
 
-declare function fastifyMysql(...params: Parameters<FastifyMysql>): ReturnType<FastifyMysql>
-export = fastifyMysql
+declare const fastifyAtMysql: FastifyPluginCallback<FastifyAtMysqlPluginOptions>;
+
+type Queryable = {
+  mysql: {
+    query<T>(query: string): Promise<T[]>;
+    transaction<T>(queries: string[]): Promise<T>;
+    sql: SQL;
+    db: ConnectionPool;
+  };
+};
+
+declare module "fastify" {
+  interface FastifyInstance {
+    mysql: Queryable["mysql"];
+  }
+}
+
+export { fastifyAtMysql as default };
+export { fastifyAtMysql };
