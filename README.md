@@ -10,16 +10,6 @@ Fastify MySQL alternative plugin.
 npm install fastify-at-mysql
 ```
 
-## Why?
-
-There are several reasons why you might want to consider using a Fastify plugin to integrate a MySQL database in a secure way and prevent SQL injections:
-
-- Security: By using a plugin that is designed specifically to prevent SQL injections, you can protect your application from one of the most common types of cyberattacks. This is particularly important if you are handling sensitive data or financial transactions.
-- Simplicity: Using a plugin can make it easier to integrate a MySQL database into your Fastify application. Rather than having to write custom code to handle database connections and queries, you can simply install the plugin and use its API to interact with the database.
-- Performance: A good plugin will be optimized for performance and can help you get the most out of your MySQL database. This can be particularly important if you are working with large datasets or need to handle a high volume of requests.
-- Ecosystem: By using a plugin, you can take advantage of the Fastify ecosystem and leverage the work of the community. This can save you time and effort, as you don't have to reinvent the wheel or write custom code for every aspect of your application.
-
-
 ## Getting Started
 
 The `fastify-at-mysql` plugin is a wrapper around the `@databases/mysql` package. It exposes the `mysql` property on the Fastify instance.
