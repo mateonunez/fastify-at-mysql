@@ -15,23 +15,7 @@ on:
       - '*.md'
 
 jobs:
-  setup-dependencies:
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [16, 18, 20]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2.2.4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "pnpm"
-      - run: pnpm fetch
-
   tests:
-    needs: setup-dependencies
     runs-on: ${{matrix.os}}
     timeout-minutes: 20
     strategy:
@@ -45,6 +29,8 @@ jobs:
           node-version: ${{matrix.node-version}}
           cache: "pnpm"
       - uses: pnpm/action-setup@v2.4.0
+        with:
+          version: 7
       - run: docker-compose up -d
       - run: pnpm install
       - run: sleep 10
