@@ -9,6 +9,11 @@ services:
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: toor
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-ptoor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - fastify_mysql_network
 
