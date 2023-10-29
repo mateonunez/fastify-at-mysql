@@ -32,26 +32,81 @@ fastify.get('/', async (request, reply) => {
 })
 ```
 
-### Exposed properties
+### Instance
 
-```
+```js
 const db = {
-  query,// use this to create queries in a simple way
-  transaction,//  use this to create transactions
-  sql,    // method to create queries in a safe-way
-  db,     // database object
+  query,        // use this to create queries in a simple way
+  transaction,  // use this to create transactions
+  task,         // use this to create tasks
+  sql,          // method to create queries in a safe-way
+  db,           // database object
 }
 ```
 
 #### Query
+
 The `query` property automatically wraps the `sql` method. It gives you a powerful and flexible way of creating queries without opening yourself to SQL Injection attacks. [Read more here](https://www.atdatabases.org/docs/sql)
+
+```js
+const result = await fastify.mysql.query(sql`SELECT * FROM contributors`)
+```
+
+You can also specify the type of the result between: `raw`, `iterator`, `stream`:
+
+**Raw**
+```js
+const result = await fastify.mysql.query(sql`SELECT * FROM contributors`, { type: 'raw' }) // default
+console.log(result) // [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }]
+```
+
+**Iterator**
+```js
+for await (const row of fastify.mysql.query(sql`SELECT * FROM contributors`, { type: 'iterator' })) {
+  console.log(row) // { id: 1, name: 'John' }
+}
+```
+
+**Stream**
+```js
+const { Transform } = require('node:stream')
+const stringify = new Transform({
+  writableObjectMode: true,
+  transform (chunk, _, callback) {
+    this.push(JSON.stringify(chunk) + '\n')
+    callback()
+  }
+})
+
+const stream = fastify.mysql.query(sql`SELECT * FROM contributors`, { type: 'stream' })
+stream.pipe(stringify).pipe(process.stdout) // { id: 1, name: 'John' }
+```
 
 
 #### Transaction
-The `transaction` property allows you to create a transaction that will be executed entirely or not at all. The underlying method accepts an array of queries. As with the `query` property, it automatically wraps the `sql` method to avoid SQL Injection attacks.
-If you want to know more about the underlying implementation you can read the [transaction](https://www.atdatabases.org/docs/mysql-guide-transactions) documentation from @databases.
 
+The `transaction` function is used to execute multiple queries in a single transaction. [Read more here](https://www.atdatabases.org/docs/transactions)
 
+```js
+const txs = [
+  (db) => db.query(fastify.mysql.sql`INSERT INTO contributors (name) VALUES ('John')`),
+  (db) => db.query(fastify.mysql.sql`INSERT INTO contributors (name) VALUES ('Jane')`),
+]
+
+const result = await fastify.mysql.transaction(txs)
+```
+
+#### Task
+
+The `task` function is used to execute a single set of operations as a single task. [Read more here](https://www.atdatabases.org/docs/tasks)
+
+```js
+const task = (db) => {
+  return db.query(fastify.mysql.sql`INSERT INTO contributors (name) VALUES ('John')`)
+}
+
+const result = await fastify.mysql.task(task)
+```
 
 ## Options
 
