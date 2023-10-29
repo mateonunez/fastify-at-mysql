@@ -4,20 +4,43 @@ const fp = require('fastify-plugin')
 const createConnectionPool = require('@databases/mysql')
 const { buildConnectionString, validateConnectionString } = require('./lib/connection-string')
 
-async function fastifyAtMysql (fastify, options) {
-  const { host, user, password, database, port = 3306, connectionString = null, name = null } = options
-
-  console.log({ connectionString })
-
-  if (connectionString) {
-    if (!validateConnectionString(connectionString)) {
+function validateOptions (options) {
+  if (options.connectionString) {
+    if (!validateConnectionString(options.connectionString)) {
       throw new Error('Invalid connection string')
     }
-  } else if (!host || !user || !password || !database) {
+  } else if (!options.host || !options.user || !options.password || !options.database) {
     throw new Error('Missing connection options')
   }
+}
 
+async function fastifyAtMysql (fastify, options) {
   const { sql } = createConnectionPool
+  const results = []
+
+  async function executeTransaction (cb) {
+    if (Array.isArray(cb)) {
+      for (const tx of cb) {
+        if (typeof tx !== 'function') {
+          throw new Error('Transaction must be a function')
+        }
+
+        const result = await executeTransaction(tx)
+        results.push(result)
+      }
+
+      return results
+    } else if (typeof cb !== 'function') {
+      throw new Error('Transaction must be a function')
+    }
+
+    return db.tx(cb)
+  }
+
+  const { host, user, password, database, port = 3306, connectionString = null, name = null } = options
+
+  validateOptions({ host, user, password, database, port, connectionString })
+
   const db = createConnectionPool({
     connectionString: connectionString || buildConnectionString({ host, user, password, database, port })
   })
@@ -26,22 +49,21 @@ async function fastifyAtMysql (fastify, options) {
     db.dispose().then(done)
   })
 
-  async function executeTransaction (queries) {
-    const transactionResult = await db.tx(async () => {
-      const results = []
-      for (const query of queries) {
-        const result = await db.query(sql(query))
-        results.push(result[0].result)
-      }
-      return results
-    })
-
-    return transactionResult
-  }
-
   const decoratorObject = {
-    query: async (queryString) => await db.query(sql(queryString)),
-    transaction: async (queryArray) => await executeTransaction(queryArray),
+    query: (queryString, options = {}) => {
+      const { type = 'raw' } = options
+      if (type === 'raw') {
+        return db.query(sql(queryString))
+      } else if (type === 'iterable') {
+        return db.queryStream(sql(queryString))
+      } else if (type === 'stream') {
+        return db.queryNodeStream(sql(queryString))
+      }
+
+      throw new Error(`Invalid result type '${type}'`)
+    },
+    transaction: (...args) => executeTransaction(...args),
+    task: (...args) => db.task(...args),
     sql,
     db
   }
