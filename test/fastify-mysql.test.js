@@ -1,5 +1,6 @@
 'use strict'
 
+const { Transform } = require('node:stream')
 const { test } = require('tap')
 const Fastify = require('fastify')
 const fastifyAtMysql = require('..')
@@ -134,17 +135,24 @@ test('should throw without name option and multiple instances', async ({ ok, sam
   }
 })
 
-test('should create a single query and execute it with the transaction() method', async ({ error, ok, teardown }) => {
+test('should create a single query and execute it with the transaction() method', async ({ error, ok, teardown, fail }) => {
   const fastify = Fastify()
   teardown(() => {
     fastify.close()
   })
 
-  await fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
 
-  const queryArray = ['SELECT NOW()']
+  const tx = () => {
+    const result = fastify.mysql[instanceName].transaction((db) => {
+      return db.query(fastify.mysql[instanceName].sql`SELECT 1+1 as result;`)
+    })
+    return result
+  }
+
   try {
-    const result = await fastify.mysql.first_db.transaction(queryArray)
+    const result = await fastify.mysql[instanceName].transaction(tx)
     ok(result.length)
   } catch (err) {
     error(err)
@@ -157,16 +165,141 @@ test('should create an array of queries and execute it with the transaction() me
     fastify.close()
   })
 
-  await fastify.register(fastifyAtMysql, { ...options, name: 'first_db' })
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
 
-  const queryArray = ['SELECT 1+1 as result;', 'SELECT 4+4 as result;']
+  const txs = [
+    () => {
+      return fastify.mysql[instanceName].query('SELECT 1+1 as result;')
+    },
+    () => {
+      return fastify.mysql[instanceName].query('SELECT 4+4 as result;')
+    }
+  ]
 
   try {
-    const result = await fastify.mysql.first_db.transaction(queryArray)
+    const result = await fastify.mysql[instanceName].transaction(txs)
     ok(result.length)
-    same(result[0], 2)
-    same(result[1], 8)
+    same(result[0][0].result, 2)
+    same(result[1][0].result, 8)
   } catch (err) {
     error(err)
+  }
+})
+
+test('should throw if the transaction is not a function', async ({ same, teardown }) => {
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  const tx = 'SELECT 1+1 as result;'
+
+  try {
+    await fastify.mysql[instanceName].transaction(tx)
+  } catch (err) {
+    same(err.message, 'Transaction must be a function')
+  }
+})
+
+test('should throw if in the array of transactions there is a non-function element', async ({ same, teardown }) => {
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  const txs = [
+    () => {
+      return fastify.mysql[instanceName].query('SELECT 1+1 as result;')
+    },
+    'SELECT 4+4 as result;'
+  ]
+
+  try {
+    await fastify.mysql[instanceName].transaction(txs)
+  } catch (err) {
+    same(err.message, 'Transaction must be a function')
+  }
+})
+
+test('should execute a task', async ({ error, ok, teardown }) => {
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  const task = (db) => {
+    return db.query(fastify.mysql[instanceName].sql`SELECT 1+1 as result;`)
+  }
+
+  try {
+    const result = await fastify.mysql[instanceName].task(task)
+    ok(result.length)
+  } catch (err) {
+    error(err)
+  }
+})
+
+test('should select on node iterable', async ({ ok, teardown }) => {
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  for await (const row of fastify.mysql[instanceName].query('SELECT 1+1 as result;', { type: 'iterable' })) {
+    ok(row)
+  }
+})
+
+test('should select on node stream', async ({ ok, teardown }) => {
+  const stringify = new Transform({
+    writableObjectMode: true,
+    transform (chunk, _, callback) {
+      this.push(JSON.stringify(chunk) + '\n')
+      callback()
+    }
+  })
+
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  const stream = fastify.mysql[instanceName].query('SELECT 1+1 as result;', { type: 'stream' })
+  stream.pipe(stringify).pipe(process.stdout)
+
+  for await (const row of stream) {
+    ok(row)
+  }
+})
+
+test('should throw with invalid type type', async ({ same, teardown }) => {
+  const fastify = Fastify()
+  teardown(() => {
+    fastify.close()
+  })
+
+  const instanceName = 'first_db'
+  await fastify.register(fastifyAtMysql, { ...options, name: instanceName })
+
+  try {
+    await fastify.mysql[instanceName].query('SELECT 1+1 as type;', { type: 'invalid' })
+  } catch (err) {
+    same(err.message, "Invalid result type 'invalid'")
   }
 })
