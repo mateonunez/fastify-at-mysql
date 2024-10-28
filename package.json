@@ -41,7 +41,7 @@
     "@databases/mysql": "^6.0.0",
     "@databases/sql": "^3.3.0",
     "@fastify/pre-commit": "^2.0.2",
-    "@types/node": "^20.8.9",
+    "@types/node": "^22.8.2",
     "fastify": "^4.24.3",
     "snazzy": "^9.0.0",
     "standard": "^17.1.0",
