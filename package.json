@@ -38,7 +38,7 @@
     "fastify-plugin": "^4.5.1"
   },
   "devDependencies": {
-    "@databases/mysql": "^6.0.0",
+    "@databases/mysql": "^7.0.0",
     "@databases/sql": "^3.3.0",
     "@fastify/pre-commit": "^2.0.2",
     "@types/node": "^20.8.9",
